@@ -4,9 +4,19 @@
     { "src": "docs/**/*", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "/releases", "dest": "/docs/releases.html" },
-    { "src": "/releases.html", "dest": "/docs/releases.html" },
-    { "src": "/(.*)", "dest": "/docs/$1" },
-    { "src": "/", "dest": "/docs/index.html" }
+    { "src": "^/$", "dest": "/docs/index.html" },
+
+    { "src": "^/releases$", "dest": "/docs/releases.html" },
+
+    { "src": "^/400$", "dest": "/docs/400.html" },
+    { "src": "^/401$", "dest": "/docs/401.html" },
+    { "src": "^/403$", "dest": "/docs/403.html" },
+    { "src": "^/404$", "dest": "/docs/404.html" },
+    { "src": "^/500$", "dest": "/docs/500.html" },
+    { "src": "^/502$", "dest": "/docs/502.html" },
+    { "src": "^/503$", "dest": "/docs/503.html" },
+    { "src": "^/504$", "dest": "/docs/504.html" },
+
+    { "src": "/(.*)", "dest": "/docs/404.html" }
   ]
 }

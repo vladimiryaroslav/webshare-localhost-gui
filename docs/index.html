@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Premium Local Web Host</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="A clean, modern PyQt-based GUI tool to host any folder or web file on a local or LAN-accessible HTTP server with one click." />
+
+  <style>
+    :root {
+      --bg: #050816;
+      --bg-alt: #070b1f;
+      --accent: #7c5cff;
+      --accent-soft: rgba(124, 92, 255, 0.18);
+      --accent-strong: #b794ff;
+      --text: #f5f5ff;
+      --muted: #a0a3b8;
+      --border-subtle: rgba(255, 255, 255, 0.06);
+      --danger: #ff5c7a;
+      --success: #4ade80;
+      --shadow-soft: 0 24px 60px rgba(0, 0, 0, 0.65);
+      --radius-lg: 18px;
+      --radius-pill: 999px;
+      --transition-fast: 0.18s ease-out;
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: radial-gradient(circle at top, #151b3a 0, #050816 45%, #02010a 100%);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(18px);
+      background: linear-gradient(
+        to bottom,
+        rgba(5, 8, 22, 0.92),
+        rgba(5, 8, 22, 0.75),
+        transparent
+      );
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .nav-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 12px;
+      background: conic-gradient(
+        from 210deg,
+        #7c5cff,
+        #4ade80,
+        #22d3ee,
+        #f97316,
+        #7c5cff
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08),
+        0 18px 40px rgba(0, 0, 0, 0.7);
+    }
+
+    .brand-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: #050816;
+    }
+
+    .brand-text-main {
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      font-size: 0.98rem;
+    }
+
+    .brand-text-sub {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      font-size: 0.86rem;
+      color: var(--muted);
+    }
+
+    .nav-links a {
+      padding: 6px 0;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -4px;
+      width: 0;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+      transition: width var(--transition-fast);
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    .nav-cta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pill {
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(15, 23, 42, 0.8);
+      font-size: 0.75rem;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, #bbf7d0, #22c55e);
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25);
+    }
+
+    .btn-primary {
+      padding: 8px 16px;
+      border-radius: var(--radius-pill);
+      border: none;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      color: #050816;
+      font-size: 0.82rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 14px 35px rgba(124, 92, 255, 0.55);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast),
+        filter var(--transition-fast);
+    }
+
+    .btn-primary span {
+      font-size: 1rem;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+      box-shadow: 0 18px 45px rgba(124, 92, 255, 0.7);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+      box-shadow: 0 10px 25px rgba(124, 92, 255, 0.5);
+    }
+
+    main {
+      flex: 1;
+    }
+
+    .hero {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 40px 20px 72px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+      gap: 40px;
+      align-items: center;
+    }
+
+    @media (max-width: 880px) {
+      .hero {
+        grid-template-columns: minmax(0, 1fr);
+        padding-top: 28px;
+      }
+      .nav-inner {
+        padding-inline: 16px;
+      }
+      .nav-links {
+        display: none;
+      }
+    }
+
+    .hero-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: radial-gradient(circle at top left, rgba(148, 163, 184, 0.25), transparent);
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .hero-kicker-badge {
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(34, 197, 94, 0.12);
+      color: #bbf7d0;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border: 1px solid rgba(34, 197, 94, 0.35);
+    }
+
+    .hero-title {
+      font-size: clamp(2.4rem, 3.2vw + 1.4rem, 3.4rem);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      margin-bottom: 14px;
+    }
+
+    .hero-title span {
+      background: linear-gradient(120deg, #e5e7ff, #c4b5fd, #7dd3fc);
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 0.98rem;
+      color: var(--muted);
+      max-width: 34rem;
+      line-height: 1.6;
+      margin-bottom: 22px;
+    }
+
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 26px;
+    }
+
+    .hero-tag {
+      font-size: 0.72rem;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      color: #e5e7eb;
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .btn-ghost {
+      padding: 8px 14px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--muted);
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: background var(--transition-fast), border-color var(--transition-fast),
+        color var(--transition-fast), transform var(--transition-fast);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(30, 64, 175, 0.7);
+      border-color: rgba(191, 219, 254, 0.7);
+      color: #e5e7eb;
+      transform: translateY(-1px);
+    }
+
+    .hero-footnote {
+      font-size: 0.75rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .hero-footnote span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hero-footnote-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .hero-card {
+      border-radius: 26px;
+      background: radial-gradient(circle at top left, #1f2937, #020617);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      box-shadow: var(--shadow-soft);
+      padding: 18px 18px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(124, 92, 255, 0.16), transparent 55%),
+        radial-gradient(circle at 100% 0%, rgba(45, 212, 191, 0.16), transparent 55%);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .hero-card-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .hero-card-title {
+      font-size: 0.86rem;
+      color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hero-card-title span {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      color: var(--muted);
+    }
+
+    .hero-card-status {
+      font-size: 0.72rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hero-card-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, #bbf7d0, #22c55e);
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25);
+    }
+
+    .hero-card-body {
+      border-radius: 18px;
+      background: rgba(15, 23, 42, 0.92);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      padding: 14px 14px 12px;
+      margin-bottom: 12px;
+    }
+
+    .hero-card-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 6px 0;
+      font-size: 0.78rem;
+      color: #e5e7eb;
+    }
+
+    .hero-card-label {
+      color: var(--muted);
+      font-size: 0.74rem;
+    }
+
+    .hero-card-pill {
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      font-size: 0.72rem;
+      color: #e5e7eb;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hero-card-pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .hero-card-path {
+      margin-top: 4px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono",
+        "Courier New", monospace;
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 10px;
+      padding: 6px 8px;
+      border: 1px dashed rgba(148, 163, 184, 0.4);
+    }
+
+    .hero-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.74rem;
+      color: var(--muted);
+    }
+
+    .hero-card-footer span strong {
+      color: #e5e7eb;
+      font-weight: 500;
+    }
+
+    .hero-card-badge {
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hero-card-badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #facc15;
+    }
+
+    .section {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 20px 64px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+      letter-spacing: -0.03em;
+    }
+
+    .section-subtitle {
+      font-size: 0.86rem;
+      color: var(--muted);
+      max-width: 26rem;
+      line-height: 1.5;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    @media (min-width: 720px) {
+      .grid-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .grid-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    .card {
+      border-radius: var(--radius-lg);
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid var(--border-subtle);
+      padding: 16px 16px 14px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top left, rgba(124, 92, 255, 0.12), transparent);
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+      pointer-events: none;
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .card-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    .card-title {
+      font-size: 0.94rem;
+      font-weight: 500;
+    }
+
+    .card-body {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .card-tagline {
+      margin-top: 8px;
+      font-size: 0.76rem;
+      color: #e5e7eb;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: rgba(15, 23, 42, 0.9);
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .list {
+      list-style: none;
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .list li::before {
+      content: "•";
+      color: var(--accent);
+      margin-top: 1px;
+    }
+
+    .code-block {
+      margin-top: 10px;
+      border-radius: 12px;
+      background: #020617;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      padding: 10px 12px;
+      font-size: 0.78rem;
+      font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono",
+        "Courier New", monospace;
+      color: #e5e7eb;
+      overflow-x: auto;
+    }
+
+    .code-line {
+      display: flex;
+      gap: 10px;
+    }
+
+    .code-line span {
+      color: rgba(148, 163, 184, 0.7);
+      min-width: 18px;
+      text-align: right;
+      user-select: none;
+    }
+
+    .code-line code {
+      white-space: pre;
+    }
+
+    .footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 18px 20px 26px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .footer-inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-links a {
+      color: var(--muted);
+    }
+
+    .footer-links a:hover {
+      color: #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="nav">
+      <div class="nav-inner">
+        <div class="brand">
+          <div class="brand-icon">
+            <!-- Minimal gear SVG -->
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7.1 7.1 0 0 0-1.63-.94l-.36-2.54A.5.5 0 0 0 13.9 2h-3.8a.5.5 0 0 0-.49.42l-.36 2.54c-.6.24-1.14.55-1.63.94l-2.39-.96a.5.5 0 0 0-.61.22L2.7 8.48a.5.5 0 0 0 .12.64l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94L2.82 14.16a.5.5 0 0 0-.12.64l1.92 3.32c.13.23.4.32.64.22l2.39-.96c.49.39 1.03.7 1.63.94l.36 2.54c.04.24.25.42.49.42h3.8c.24 0 .45-.18.49-.42l.36-2.54c.6-.24 1.14-.55 1.63-.94l2.39.96c.24.1.51.01.64-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58ZM12 15.2A3.2 3.2 0 1 1 12 8.8a3.2 3.2 0 0 1 0 6.4Z" />
+            </svg>
+          </div>
+          <div>
+            <div class="brand-text-main">Premium Local Web Host</div>
+            <div class="brand-text-sub">One‑click local & LAN HTTP server</div>
+          </div>
+        </div>
+
+        <nav class="nav-links">
+          <a href="#features">Features</a>
+          <a href="#use-cases">Use cases</a>
+          <a href="#installation">Installation</a>
+          <a href="#about">About</a>
+        </nav>
+
+        <div class="nav-cta">
+          <div class="pill">
+            <span class="pill-dot"></span>
+            PyQt desktop app
+          </div>
+          <button class="btn-primary" onclick="document.getElementById('installation').scrollIntoView({behavior:'smooth'})">
+            Install now <span>↗</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- HERO -->
+      <section class="hero">
+        <div>
+          <div class="hero-kicker">
+            <span class="hero-kicker-badge">New</span>
+            One‑click hosting for any local web project
+          </div>
+          <h1 class="hero-title">
+            Host any folder on <span>localhost or LAN</span> in a single click.
+          </h1>
+          <p class="hero-subtitle">
+            Premium Local Web Host is a clean, modern PyQt‑based GUI that turns any folder or HTML file
+            into a local or WiFi‑accessible HTTP server—perfect for previews, demos, and quick sharing.
+          </p>
+
+          <div class="hero-tags">
+            <div class="hero-tag">PyQt desktop UI</div>
+            <div class="hero-tag">Localhost &amp; LAN modes</div>
+            <div class="hero-tag">Auto‑open browser</div>
+            <div class="hero-tag">Dark, modern layout</div>
+          </div>
+
+          <div class="hero-actions">
+            <button class="btn-primary" onclick="document.getElementById('installation').scrollIntoView({behavior:'smooth'})">
+              Get started in minutes <span>⚡</span>
+            </button>
+            <button class="btn-ghost" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})">
+              Explore features
+            </button>
+          </div>
+
+          <div class="hero-footnote">
+            <span><span class="hero-footnote-dot"></span> No config files, no terminals, no fuss.</span>
+            <span>Just pick a folder, choose a mode, and you’re live.</span>
+          </div>
+        </div>
+
+        <!-- Hero preview card -->
+        <aside class="hero-card" aria-label="App preview">
+          <div class="hero-card-inner">
+            <div class="hero-card-header">
+              <div class="hero-card-title">
+                Local server
+                <span>PyQt GUI</span>
+              </div>
+              <div class="hero-card-status">
+                <span class="hero-card-status-dot"></span>
+                Running on port 8000
+              </div>
+            </div>
+
+            <div class="hero-card-body">
+              <div class="hero-card-row">
+                <div>
+                  <div class="hero-card-label">Mode</div>
+                  <div class="hero-card-pill">
+                    <span class="hero-card-pill-dot"></span>
+                    Global Network Host
+                  </div>
+                </div>
+                <div>
+                  <div class="hero-card-label">Address</div>
+                  <div>http://192.168.0.42:8000</div>
+                </div>
+              </div>
+
+              <div class="hero-card-row">
+                <div>
+                  <div class="hero-card-label">Serving</div>
+                  <div>Entire project directory</div>
+                </div>
+                <div>
+                  <div class="hero-card-label">Auto‑open browser</div>
+                  <div>Enabled</div>
+                </div>
+              </div>
+
+              <div class="hero-card-path">
+                <strong>Path:</strong> C:/Users/you/Projects/landing‑page/
+              </div>
+            </div>
+
+            <div class="hero-card-footer">
+              <span>Share with <strong>phones, tablets, and other PCs</strong> on your WiFi.</span>
+              <div class="hero-card-badge">
+                <span class="hero-card-badge-dot"></span>
+                Perfect for live demos
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <!-- FEATURES -->
+      <section id="features" class="section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Features built for real‑world workflows</h2>
+          </div>
+          <p class="section-subtitle">
+            From quick previews to LAN‑wide demos, Premium Local Web Host keeps everything one click away,
+            wrapped in a polished dark UI.
+          </p>
+        </div>
+
+        <div class="grid grid-3">
+          <article class="card">
+            <div class="card-header">
+              <div class="card-icon">📂</div>
+              <div class="card-title">Serve a file or a full project</div>
+            </div>
+            <div class="card-body">
+              Choose a single HTML file for a focused demo, or point to an entire project directory
+              containing HTML, JS, CSS, assets, and more.
+              <p class="card-tagline">Your local filesystem becomes a one‑click web root.</p>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div class="card-icon">🌐</div>
+              <div class="card-title">Localhost &amp; LAN hosting</div>
+            </div>
+            <div class="card-body">
+              Toggle between:
+              <ul class="list">
+                <li><strong>Local Host</strong> — only accessible on your machine.</li>
+                <li><strong>Global Network Host</strong> — reachable from phones, tablets, and other PCs on your WiFi/LAN.</li>
+              </ul>
+              <p class="card-tagline">Perfect for testing on real devices without deploying anywhere.</p>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div class="card-icon">⚡</div>
+              <div class="card-title">Auto‑open browser</div>
+            </div>
+            <div class="card-body">
+              When the server starts, your default browser launches automatically to the correct URL.
+              No copy‑pasting, no guessing ports.
+              <p class="card-tagline">Hit “Start”, and you’re already looking at your site.</p>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div class="card-icon">🎨</div>
+              <div class="card-title">Clean, modern PyQt UI</div>
+            </div>
+            <div class="card-body">
+              A dark, premium layout with a proper SVG gear icon for settings, clear controls, and
+              intuitive layout—no clutter, no noise.
+              <p class="card-tagline">Feels like a native, professional desktop tool.</p>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div class="card-icon">🧹</div>
+              <div class="card-title">Instant reset</div>
+            </div>
+            <div class="card-body">
+              Quickly clear your current file or folder selection and start over. Ideal when you’re
+              jumping between multiple projects or demos.
+              <p class="card-tagline">Stay in flow while switching contexts.</p>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div class="card-icon">🛡️</div>
+              <div class="card-title">Local‑first by design</div>
+            </div>
+            <div class="card-body">
+              Everything runs on your machine. You control when to expose your server to the local
+              network and when to keep it private.
+              <p class="card-tagline">No external dependencies, no cloud required.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- USE CASES -->
+      <section id="use-cases" class="section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Perfect for developers, designers, and demo days</h2>
+          </div>
+          <p class="section-subtitle">
+            Whether you’re building, testing, or presenting, Premium Local Web Host gives you a frictionless
+            way to put your work on screen—any screen.
+          </p>
+        </div>
+
+        <div class="grid grid-2">
+          <article class="card">
+            <div class="card-header">
+              <div class="card-icon">💻</div>
+              <div class="card-title">Web developers previewing projects</div>
+            </div>
+            <div class="card-body">
+              <ul class="list">
+                <li>Spin up a local HTTP server for any static site in seconds.</li>
+                <li>Test routing, assets, and relative paths as they’ll behave in production.</li>
+                <li>Keep your terminal free for logs and tooling.</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div class="card-icon">📱</div>
+              <div class="card-title">Testing on mobile devices</div>
+            </div>
+            <div class="card-body">
+              <ul class="list">
+                <li>Use Global Network Host to reach your machine from phones and tablets.</li>
+                <li>Check responsive layouts on real hardware, not just emulators.</li>
+                <li>Share a URL with teammates on the same WiFi for quick feedback.</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div class="card-icon">🤝</div>
+              <div class="card-title">Quick LAN sharing</div>
+            </div>
+            <div class="card-body">
+              <ul class="list">
+                <li>Showcase prototypes in meetings without deploying to a remote server.</li>
+                <li>Let others connect directly to your machine over the local network.</li>
+                <li>Great for classrooms, workshops, and internal reviews.</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div class="card-icon">🎬</div>
+              <div class="card-title">Local demos &amp; prototypes</div>
+            </div>
+            <div class="card-body">
+              <ul class="list">
+                <li>Run polished demos even with no internet connection.</li>
+                <li>Switch between projects quickly using the clear selection and reset controls.</li>
+                <li>Keep everything local, fast, and under your control.</li>
+              </ul>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- INSTALLATION -->
+      <section id="installation" class="section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Installation</h2>
+          </div>
+          <p class="section-subtitle">
+            Get up and running in just a couple of commands. All you need is Python and PyQt5.
+          </p>
+        </div>
+
+        <div class="grid grid-2">
+          <article class="card">
+            <div class="card-header">
+              <div class="card-icon">①</div>
+              <div class="card-title">Install Python 3.8+</div>
+            </div>
+            <div class="card-body">
+              <p>
+                Download and install Python 3.8 or newer from the official website:
+                <br />
+                <a href="https://python.org" target="_blank" rel="noreferrer">python.org</a>
+              </p>
+              <div class="code-block">
+                <div class="code-line">
+                  <span>1</span>
+                  <code># Download the latest Python 3.8+ installer from python.org</code>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div class="card-icon">②</div>
+              <div class="card-title">Install dependencies</div>
+            </div>
+            <div class="card-body">
+              <p>Install PyQt5 using <code>pip</code>:</p>
+              <div class="code-block">
+                <div class="code-line">
+                  <span>1</span>
+                  <code>pip install PyQt5</code>
+                </div>
+              </div>
+              <p class="card-tagline">
+                Once installed, launch Premium Local Web Host and start serving your projects instantly.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ABOUT -->
+      <section id="about" class="section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">About Premium Local Web Host</h2>
+          </div>
+          <p class="section-subtitle">
+            Built for developers who want the convenience of a GUI without sacrificing control, speed,
+            or clarity.
+          </p>
+        </div>
+
+        <div class="grid grid-2">
+          <article class="card">
+            <div class="card-header">
+              <div class="card-icon">🧩</div>
+              <div class="card-title">PyQt at the core</div>
+            </div>
+            <div class="card-body">
+              Premium Local Web Host is powered by PyQt, giving it a native‑feeling desktop experience
+              with a modern dark theme, crisp typography, and a custom SVG gear icon for settings.
+              <p class="card-tagline">
+                It’s a GUI that respects your time and your eyes.
+              </p>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card-header">
+              <div class="card-icon">✨</div>
+              <div class="card-title">Designed for focus</div>
+            </div>
+            <div class="card-body">
+              Every control is there for a reason: pick a file or folder, choose your host mode,
+              start the server, and optionally reset. No hidden complexity, no noisy options.
+              <p class="card-tagline">
+                A small, sharp tool that does one thing exceptionally well.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <div>© <span id="year"></span> Premium Local Web Host. All rights reserved.</div>
+        <div class="footer-links">
+          <span class="badge">
+            <span class="badge-dot"></span>
+            Local &amp; LAN HTTP server in one click
+          </span>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Set current year in footer
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

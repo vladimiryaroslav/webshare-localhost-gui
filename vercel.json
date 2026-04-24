@@ -4,6 +4,9 @@
     { "src": "docs/**/*", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "/docs/$1" }
+    { "src": "/releases", "dest": "/docs/releases.html" },
+    { "src": "/releases.html", "dest": "/docs/releases.html" },
+    { "src": "/(.*)", "dest": "/docs/$1" },
+    { "src": "/", "dest": "/docs/index.html" }
   ]
 }

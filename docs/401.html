@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>401 – Unauthorized</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: radial-gradient(circle at top, #151b3a 0, #050816 45%, #02010a 100%);
+      color: #f5f5ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 4rem;
+      background: linear-gradient(120deg, #e5e7ff, #c4b5fd, #7dd3fc);
+      -webkit-background-clip: text;
+      color: transparent;
+      margin-bottom: 10px;
+    }
+    p { color: #a0a3b8; font-size: 1.1rem; margin-bottom: 30px; }
+    .actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      padding: 10px 18px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #7c5cff, #b794ff);
+      color: #050816;
+    }
+    .btn-secondary {
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(15,23,42,0.9);
+      color: #a0a3b8;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <h1>401</h1>
+    <p>You don’t have permission to access this page.</p>
+    <div class="actions">
+      <a class="btn btn-primary" href="/">← Home</a>
+      <a class="btn btn-secondary" href="/releases">Releases</a>
+    </div>
+  </div>
+</body>
+</html>
